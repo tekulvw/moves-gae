@@ -1,3 +1,4 @@
+from io import BytesIO
 from pathlib import Path
 
 from flask import current_app
@@ -10,7 +11,7 @@ def _get_storage_client():
     )
 
 
-def upload_file(data: str, content_type: str, full_path: Path) -> str:
+def upload_file(data: BytesIO, content_type: str, full_path: Path) -> str:
     """
     Uploads binary data to the given path on Google Cloud Storage.
     :param data:
@@ -34,7 +35,7 @@ def upload_file(data: str, content_type: str, full_path: Path) -> str:
     bucket = client.bucket(bucket_name=bucket_name)
     blob = bucket.blob(str(blob_path))
 
-    blob.upload_from_string(data, content_type=content_type)
+    blob.upload_from_string(data.read(), content_type=content_type)
     blob.make_public()
 
     return blob.public_url
