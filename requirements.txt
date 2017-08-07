@@ -1,0 +1,7 @@
+Flask
+gunicorn
+raven[flask]
+pillow
+google-cloud-storage
+google-cloud-datastore
+google-cloud-pubsub
