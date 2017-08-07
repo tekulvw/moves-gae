@@ -1,4 +1,5 @@
 from flask import Flask
+from raven.contrib.flask import Sentry
 import logging
 import os
 
@@ -12,6 +13,10 @@ def set_env_vars(app):
     app.config['IMAGE_STORE'] = os.environ.get('IMAGE_STORE')
 
 
+def maybe_setup_sentry(app):
+    Sentry(app)
+
+
 @app.errorhandler(500)
 def server_error(e):
     logging.exception('An error occurred during a request.')
@@ -22,6 +27,7 @@ def server_error(e):
 
 
 set_env_vars(app)
+maybe_setup_sentry(app)
 
 images.setup_routing(app)
 
