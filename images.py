@@ -1,12 +1,11 @@
 from io import BytesIO
-from pathlib import Path
 
 import flask
 from PIL import Image, ExifTags
-from flask import request, abort, current_app
+from flask import request, abort
 from werkzeug.datastructures import FileStorage
 
-from storage import upload_file
+from storage import upload_image, generate_image_path
 
 
 def image_upload():
@@ -56,26 +55,9 @@ def _handle_image_uploading(image: BytesIO, output: str, ext: str, content_type:
         Full path location in Cloud Storage
     """
 
-    full_path = _generate_storage_path(output, ext)
+    full_path = generate_image_path(output, ext)
 
-    return upload_file(image, content_type, full_path)
-
-
-def _generate_storage_path(output_name: str, ext: str) -> Path:
-    """
-    Generates the full path to be passed to :py:function:`storage.upload_file`.
-    :param output_name:
-        Output filename, usually gathered from an upload request.
-    :param ext:
-        Output extension, usually gathered from an upload request.
-    :return:
-        Full path to be passed to :py:function:`storage.upload_file`.
-    """
-    image_store = current_app.config['IMAGE_STORE']
-
-    path = "{}/{}.{}".format(image_store, output_name, ext)
-
-    return Path(path)
+    return upload_image(image, content_type, full_path)
 
 
 def image_upload_with_overlay():

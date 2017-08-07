@@ -4,13 +4,16 @@ import logging
 import os
 
 import images
+import download
 
 app = Flask(__name__)
 
 
 def set_env_vars(app):
     app.config['PROJECT_ID'] = os.environ.get('PROJECT_ID')
-    app.config['IMAGE_STORE'] = os.environ.get('IMAGE_STORE')
+    app.config['STORAGE_BUCKET'] = os.environ.get('STORAGE_BUCKET')
+    app.config['IMAGE_PREFIX'] = os.environ.get('IMAGE_PREFIX')
+    app.config['VIDEO_PREFIX'] = os.environ.get('VIDEO_PREFIX')
 
 
 def maybe_setup_sentry(app):
@@ -30,6 +33,7 @@ set_env_vars(app)
 maybe_setup_sentry(app)
 
 images.setup_routing(app)
+download.setup_routing(app)
 
 
 if __name__ == '__main__':

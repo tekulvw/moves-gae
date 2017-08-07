@@ -8,5 +8,7 @@ runtime_config:
 
 env_variables:
   PROJECT_ID: moves-gae
-  IMAGE_STORE: moves-gae.appspot.com/images
+  STORAGE_BUCKET: moves-gae.appspot.com
+  IMAGE_PREFIX: images
+  VIDEO_PREFIX: videos
   SENTRY_DSN: https://d788d6b7989a410cb575e9e0f806914d:d6c0eca4ba4f4d799ce85d1dbb30b3eb@sentry.io/200794
