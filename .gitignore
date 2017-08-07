@@ -149,3 +149,5 @@ ENV/
 
 # mypy
 .mypy_cache/
+/moves-gae.json
+/travis-client-secret.json

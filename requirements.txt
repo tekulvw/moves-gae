@@ -5,3 +5,4 @@ pillow
 google-cloud-storage
 google-cloud-datastore
 google-cloud-pubsub
+pytest>=3
