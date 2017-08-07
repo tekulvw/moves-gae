@@ -78,7 +78,9 @@ def image_upload_with_overlay():
 
 
 def setup_routing(app: flask.Flask):
-    app.add_url_rule('/image_upload', endpoint=image_upload,
+    app.add_url_rule('/image_upload', endpoint='image',
+                     view_func=image_upload,
                      methods=["POST"])
-    app.add_url_rule('/image_upload_with_overlay', endpoint=image_upload_with_overlay,
+    app.add_url_rule('/image_upload_with_overlay', endpoint='image.overlay',
+                     view_func=image_upload_with_overlay,
                      methods=["POST"])

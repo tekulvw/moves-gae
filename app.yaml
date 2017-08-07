@@ -1,4 +1,4 @@
-service: upload
+service: default
 runtime: python
 env: flex
 entrypoint: gunicorn -b :$PORT main:app
@@ -8,4 +8,4 @@ runtime_config:
 
 env_variables:
   PROJECT_ID: moves-gae
-  IMAGE_STORE: moves-gae/images
+  IMAGE_STORE: moves-gae.appspot.com/images
