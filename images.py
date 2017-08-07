@@ -2,7 +2,7 @@ from io import BytesIO
 from pathlib import Path
 
 import flask
-from PIL import Image
+from PIL import Image, ExifTags
 from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 
@@ -102,8 +102,8 @@ def _combine_images(background: FileStorage, overlay: FileStorage,
         Object ready for uploading.
     :rtype:BytesIO
     """
-    background = Image.open(background)
-    overlay = Image.open(overlay)
+    background = _check_rotation_exif(Image.open(background))
+    overlay = _check_rotation_exif(Image.open(overlay))
 
     background = background.convert("RGBA")
     overlay = overlay.convert("RGBA")
@@ -112,7 +112,7 @@ def _combine_images(background: FileStorage, overlay: FileStorage,
 
     background.paste(
         overlay,
-        (0, 0),
+        (0, 0, background.size[0], background.size[1]),
         overlay
     )
 
@@ -128,6 +128,33 @@ def _combine_images(background: FileStorage, overlay: FileStorage,
     data.seek(0)
 
     return data
+
+
+def _check_rotation_exif(image: Image) -> Image:
+    """
+    Checks the rotational exif data on a given image and rotates it
+    accordingly.
+    :param image:
+    :return:
+        Rotated image.
+    :rtype:
+        PIL.Image
+    """
+    for orientation in ExifTags.TAGS.keys():
+        if ExifTags.TAGS[orientation] == 'Orientation':
+            try:
+                exif = dict(image._getexif().items())
+            except AttributeError:
+                return image
+
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
+            return image
+    return image
 
 
 def _extract_overlay_form_data():
