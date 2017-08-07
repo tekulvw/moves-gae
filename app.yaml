@@ -7,4 +7,5 @@ runtime_config:
   python_version: 3
 
 env_variables:
+  PROJECT_ID: moves-gae
   IMAGE_STORE: moves-gae/images

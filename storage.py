@@ -1,8 +1,13 @@
 from pathlib import Path
 
-from google.cloud.storage import Client
+from flask import current_app
+from google.cloud import storage
 
-client = Client()
+
+def _get_storage_client():
+    return storage.Client(
+        project=current_app.config['PROJECT_ID']
+    )
 
 
 def upload_file(data: str, content_type: str, full_path: Path) -> str:
@@ -25,6 +30,7 @@ def upload_file(data: str, content_type: str, full_path: Path) -> str:
     bucket_name, blob_parts = full_path.parts[0], full_path.parts[1:]
     blob_path = Path(*blob_parts)
 
+    client = _get_storage_client()
     bucket = client.bucket(bucket_name=bucket_name)
     blob = bucket.blob(str(blob_path))
 

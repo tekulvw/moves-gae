@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 
 def set_env_vars(app):
+    app.config['PROJECT_ID'] = os.environ.get('PROJECT_ID')
     app.config['IMAGE_STORE'] = os.environ.get('IMAGE_STORE')
 
 
