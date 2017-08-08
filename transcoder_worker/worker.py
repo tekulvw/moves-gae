@@ -123,7 +123,7 @@ def get_from_storage(path, proj, buckname) -> BytesIO:
     return BytesIO(blob.download_as_string())
 
 
-def _upload_final(video: BytesIO, file_name, proj, bucket):
+def _upload_final(video: BytesIO, file_name, proj, bucket, content_type):
     client = storage.Client(project=proj)
     bucket = client.bucket(bucket)
 
@@ -133,16 +133,13 @@ def _upload_final(video: BytesIO, file_name, proj, bucket):
 
     blob = bucket.blob(str(file_path))
 
-    blob.upload_from_string(video.read())
+    blob.upload_from_string(video.read(), content_type=content_type)
 
     blob.make_public()
 
 
 def process_message(msg, proj, bucket):
-    print(msg)
-    print(msg.data)
-
-    data = json.loads(base64.b64decode(msg.data))
+    data = json.loads(msg.data.decode('utf-8'))
 
     video_loc = data['video']
     overlay_loc = data['overlay']
@@ -153,7 +150,7 @@ def process_message(msg, proj, bucket):
 
     output = _render_overlay(video, overlay)
 
-    _upload_final(output, Path(video_loc).name, proj, bucket)
+    _upload_final(output, Path(video_loc).name, proj, bucket, content_type)
 
 
 if __name__ == '__main__':

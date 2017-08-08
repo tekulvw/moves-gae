@@ -68,6 +68,7 @@ def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
     )
 
     topic = _get_transcode_topic()
+    print("Publishing...")
     topic.publish(json.dumps(pubsub_payload).encode('utf-8'))
 
 
