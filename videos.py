@@ -1,6 +1,5 @@
 from io import BytesIO
-from pathlib import Path
-from subprocess import getoutput, run
+from subprocess import getoutput, run, PIPE
 import logging
 import os
 from PIL import Image
@@ -105,9 +104,10 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
         video.seek(0)
 
     cmd = ["/usr/bin/avconv", "-i", tmp_loc, "-i", overlay_loc, "-strict", "-2",
-           "-filter_complex", '"overlay=0:0"', output_loc]
+           "-codec:v", "libx264", "-b:v", "2048k", "-bufsize", "500k", "-filter_complex",
+           "overlay=0:0", output_loc]
 
-    output = run(cmd)
+    output = run(cmd, stdout=PIPE, stderr=PIPE)
     if output.returncode != 0:
         raise RuntimeError("Avconv process did not return successfully. LOG:\n"
                            "{}\n\n{}".format(output.stdout, output.stderr))
