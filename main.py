@@ -4,6 +4,7 @@ import logging
 import os
 
 import images
+import videos
 import download
 
 app = Flask(__name__)
@@ -33,6 +34,7 @@ set_env_vars(app)
 maybe_setup_sentry(app)
 
 images.setup_routing(app)
+videos.setup_routing(app)
 download.setup_routing(app)
 
 
