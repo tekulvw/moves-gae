@@ -58,8 +58,8 @@ def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
     overlay_path = path / 'overlay.png'
     video_path = path / (file_name + '.' + ext)
 
-    storage.upload_data(overlay.read(), 'image/png', overlay_path)
-    storage.upload_data(video.read(), content_type, video_path)
+    storage.upload_data(overlay, 'image/png', overlay_path)
+    storage.upload_data(video, content_type, video_path)
 
     pubsub_payload = dict(
         video=str(video_path),

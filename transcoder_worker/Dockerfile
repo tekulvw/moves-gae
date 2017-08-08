@@ -5,7 +5,7 @@ RUN apt-get -y update && apt-get install -y libav-tools
 
 # Create a virtualenv for dependencies. This isolates these packages from
  # system-level packages.
-RUN virtualenv /env
+RUN virtualenv /env -p python3.5
 
  # Setting these environment variables are the same as running
  # source /env/bin/activate.

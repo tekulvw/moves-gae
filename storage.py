@@ -71,7 +71,7 @@ def generate_transcoding_path() -> Path:
     :return:
     """
     prefix = _get_transcoding_prefix()
-    return Path(prefix, uuid.uuid4())
+    return Path(prefix, str(uuid.uuid4()))
 
 
 def upload_data(data: BytesIO, content_type: str, full_path: Path) -> str:

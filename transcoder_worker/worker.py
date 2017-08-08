@@ -2,6 +2,7 @@ import json
 from io import BytesIO
 from pathlib import Path
 from subprocess import getoutput, run, PIPE
+import base64
 
 from google.cloud import storage, pubsub
 
@@ -139,8 +140,9 @@ def _upload_final(video: BytesIO, file_name, proj, bucket):
 
 def process_message(msg, proj, bucket):
     print(msg)
+    print(msg.data)
 
-    data = json.loads(message.decode('utf-8'))
+    data = json.loads(base64.b64decode(msg.data))
 
     video_loc = data['video']
     overlay_loc = data['overlay']
@@ -165,6 +167,9 @@ if __name__ == '__main__':
         topic.create()
 
     sub = topic.subscription('transcode_worker', ack_deadline=60)
+    if not sub.exists():
+        sub.create()
+
     print("Polling pubsub.")
 
     while True:

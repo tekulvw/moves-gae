@@ -2,6 +2,9 @@ service: transcoder
 runtime: custom
 env: flex
 
+runtime_config:
+  python_version: 3
+
 env_variables:
   PROJECT_ID: moves-gae
   STORAGE_BUCKET: moves-gae.appspot.com
