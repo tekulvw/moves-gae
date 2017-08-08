@@ -15,6 +15,8 @@ def set_env_vars(app):
     app.config['STORAGE_BUCKET'] = os.environ.get('STORAGE_BUCKET')
     app.config['IMAGE_PREFIX'] = os.environ.get('IMAGE_PREFIX')
     app.config['VIDEO_PREFIX'] = os.environ.get('VIDEO_PREFIX')
+    app.config['TRANSCODING_PREFIX'] = os.environ.get('TRANSCODING_PREFIX')
+    app.config['TRANSCODE_TOPIC'] = os.environ.get('TRANSCODE_TOPIC')
 
 
 def maybe_setup_sentry(app):
