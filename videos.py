@@ -1,12 +1,15 @@
 from io import BytesIO
+from pathlib import Path
 from subprocess import getoutput
-
+import logging
 import os
 from PIL import Image
 from flask import Flask, request, abort
 
 import storage
 import images
+
+log = logging.getLogger(__name__)
 
 
 # I thoroughly dislike doing this, here's the alternative:
@@ -105,6 +108,11 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
            "".format(tmp_loc, overlay_loc, output_loc))
 
     output = getoutput(cmd)
+
+    output_path = Path(output_loc)
+
+    log.info("Exists: {}\nSize: {}".format(output_path.exists(), output_path.stat().st_size))
+    print("Exists: {}\nSize: {}".format(output_path.exists(), output_path.stat().st_size))
 
     with open(output_loc, 'rb') as f:
         output = BytesIO(f.read())
