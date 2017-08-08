@@ -1,0 +1,3 @@
+
+worker:  python /app/worker.py
+monitor: python monitor.py

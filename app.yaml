@@ -1,7 +1,7 @@
 service: default
-runtime: custom
+runtime: python
 env: flex
-entrypoint: gunicorn -b :$PORT main:app
+entrypoint: gunicorn -k gevent -b :$PORT main:app
 
 runtime_config:
   python_version: 3
@@ -11,4 +11,6 @@ env_variables:
   STORAGE_BUCKET: moves-gae.appspot.com
   IMAGE_PREFIX: images
   VIDEO_PREFIX: videos
+  TRANSCODING_PREFIX: transcoding
+  TRANSCODE_TOPIC: transcode_request
   SENTRY_DSN: https://d788d6b7989a410cb575e9e0f806914d:d6c0eca4ba4f4d799ce85d1dbb30b3eb@sentry.io/200794
