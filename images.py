@@ -5,7 +5,7 @@ from PIL import Image, ExifTags
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 
-from storage import upload_image, generate_image_path
+from storage import upload_data, generate_image_path
 
 
 def image_upload():
@@ -57,7 +57,7 @@ def _handle_image_uploading(image: BytesIO, output: str, ext: str, content_type:
 
     full_path = generate_image_path(output, ext)
 
-    return upload_image(image, content_type, full_path)
+    return upload_data(image, content_type, full_path)
 
 
 def image_upload_with_overlay():

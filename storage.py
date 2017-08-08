@@ -59,7 +59,7 @@ def generate_video_path(output_name: str, ext: str) -> Path:
     return Path(path)
 
 
-def upload_image(data: BytesIO, content_type: str, full_path: Path) -> str:
+def upload_data(data: BytesIO, content_type: str, full_path: Path) -> str:
     """
     Uploads binary data to the given path on Google Cloud Storage.
     :param data:
