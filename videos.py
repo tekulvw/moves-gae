@@ -1,6 +1,6 @@
 from io import BytesIO
 from pathlib import Path
-from subprocess import getoutput
+from subprocess import getoutput, run
 import logging
 import os
 from PIL import Image
@@ -90,7 +90,7 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
 
     # noinspection PyProtectedMember
     overlay = images._check_rotation_exif(overlay)
-    overlay.resize(size)
+    overlay = overlay.resize(size)
 
     import uuid
 
@@ -104,15 +104,13 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
         f.write(video.read())
         video.seek(0)
 
-    cmd = ("/usr/bin/avconv -i {} -i {} -strict -2 -filter_complex \"overlay=0:0\" {}"
-           "".format(tmp_loc, overlay_loc, output_loc))
+    cmd = ["/usr/bin/avconv", "-i", tmp_loc, "-i", overlay_loc, "-strict", "-2",
+           "-filter_complex", '"overlay=0:0"', output_loc]
 
-    output = getoutput(cmd)
-
-    output_path = Path(output_loc)
-
-    log.info("Exists: {}\nSize: {}".format(output_path.exists(), output_path.stat().st_size))
-    print("Exists: {}\nSize: {}".format(output_path.exists(), output_path.stat().st_size))
+    output = run(cmd)
+    if output.returncode != 0:
+        raise RuntimeError("Avconv process did not return successfully. LOG:\n"
+                           "{}\n\n{}".format(output.stdout, output.stderr))
 
     with open(output_loc, 'rb') as f:
         output = BytesIO(f.read())
