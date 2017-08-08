@@ -1,8 +1,12 @@
+import json
 from io import BytesIO
+from pathlib import Path
 from subprocess import getoutput, run, PIPE
 
+from google.cloud import storage, pubsub
+
 import os
-from PIL import Image
+from PIL import Image, ExifTags
 
 
 def _get_resolution(video: BytesIO) -> (int, int):
@@ -48,7 +52,7 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
     size = _get_resolution(video)
 
     # noinspection PyProtectedMember
-    overlay = images._check_rotation_exif(overlay)
+    overlay = _check_rotation_exif(overlay)
     overlay = overlay.resize(size)
 
     import uuid
@@ -80,3 +84,93 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
     os.remove(output_loc)
 
     return output
+
+
+def _check_rotation_exif(image: Image) -> Image:
+    """
+    Checks the rotational exif data on a given image and rotates it
+    accordingly.
+    :param image:
+    :return:
+        Rotated image.
+    :rtype:
+        PIL.Image
+    """
+    for orientation in ExifTags.TAGS.keys():
+        if ExifTags.TAGS[orientation] == 'Orientation':
+            try:
+                exif = dict(image._getexif().items())
+            except AttributeError:
+                return image
+
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
+            return image
+    return image
+
+
+def get_from_storage(path, proj, buckname) -> BytesIO:
+    client = storage.Client(project=proj)
+    bucket = client.bucket(buckname)
+
+    blob = bucket.get_blob(path)
+
+    return BytesIO(blob.download_as_string())
+
+
+def _upload_final(video: BytesIO, file_name, proj, bucket):
+    client = storage.Client(project=proj)
+    bucket = client.bucket(bucket)
+
+    video_prefix = os.environ.get('VIDEO_PREFIX')
+
+    file_path = Path(video_prefix, file_name)
+
+    blob = bucket.blob(str(file_path))
+
+    blob.upload_from_string(video.read())
+
+    blob.make_public()
+
+
+def process_message(msg, proj, bucket):
+    print(msg)
+
+    data = json.loads(message.decode('utf-8'))
+
+    video_loc = data['video']
+    overlay_loc = data['overlay']
+    content_type = data['content_type']
+
+    video = get_from_storage(video_loc, proj, bucket)
+    overlay = Image.open(get_from_storage(overlay_loc, proj, bucket))
+
+    output = _render_overlay(video, overlay)
+
+    _upload_final(output, Path(video_loc).name, proj, bucket)
+
+
+if __name__ == '__main__':
+    project_id = os.environ.get('PROJECT_ID')
+    transcode_topic_name = os.environ.get('TRANSCODE_TOPIC')
+    bucket_name = os.environ.get('STORAGE_BUCKET')
+
+    pubsub_client = pubsub.Client(project=project_id)
+    topic = pubsub_client.topic(transcode_topic_name)
+    if not topic.exists():
+        topic.create()
+
+    sub = topic.subscription('transcode_worker', ack_deadline=60)
+    print("Polling pubsub.")
+
+    while True:
+        messages = sub.pull(
+            return_immediately=False, max_messages=1
+        )
+        for ack_id, message in messages:
+            process_message(message, project_id, bucket_name)
+            sub.acknowledge([ack_id])

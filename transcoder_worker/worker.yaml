@@ -1,3 +1,9 @@
 service: transcoder
 runtime: custom
 env: flex
+
+env_variables:
+  PROJECT_ID: moves-gae
+  STORAGE_BUCKET: moves-gae.appspot.com
+  TRANSCODE_TOPIC: transcode_request
+  VIDEO_PREFIX: videos
