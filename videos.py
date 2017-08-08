@@ -46,8 +46,6 @@ def _extract_data_video_upload():
 def video_upload_with_overlay():
     overlay, (video, file_name, ext, content_type) = _extract_overlay_data()
 
-    print("extracted data")
-
     _publish_video_overlay_upload(overlay, video, file_name, ext, content_type)
 
     return '', 204
@@ -55,16 +53,13 @@ def video_upload_with_overlay():
 
 def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
                                   file_name: str, ext: str, content_type: str):
-    print('generating transcoding path')
     path = storage.generate_transcoding_path()
 
     overlay_path = path / 'overlay.png'
     video_path = path / (file_name + '.' + ext)
 
-    print('uploading data')
     storage.upload_data(overlay, 'image/png', overlay_path)
     storage.upload_data(video, content_type, video_path)
-    print('data uploaded')
 
     pubsub_payload = dict(
         video=str(video_path),
@@ -73,7 +68,6 @@ def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
     )
 
     topic = _get_transcode_topic()
-    print("Publishing...")
     topic.publish(json.dumps(pubsub_payload).encode('utf-8'))
 
 
