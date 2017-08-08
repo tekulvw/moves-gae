@@ -1,6 +1,7 @@
 from io import BytesIO
 from subprocess import getoutput
 
+import os
 from PIL import Image
 from flask import Flask, request, abort
 
@@ -107,7 +108,10 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
 
     with open(output_loc, 'rb') as f:
         output = BytesIO(f.read())
-        output.seek(0)
+
+    os.remove(tmp_loc)
+    os.remove(overlay_loc)
+    os.remove(output_loc)
 
     return output
 
