@@ -56,8 +56,7 @@ def _get_resolution(video: BytesIO) -> (int, int):
         f.write(video.read())
     video.seek(0)
 
-    cmd = ("avprobe -v error -show_entries stream=width,height"
-           " -of default=noprint_wrappers=1 {}".format(tmploc))
+    cmd = ("/usr/bin/avconv -i " + tmploc + r" 2>&1 | perl -lane 'print $1 if /(\d{2,10}x\d{2,10})/'")
 
     output = getoutput(cmd)
 
@@ -65,10 +64,12 @@ def _get_resolution(video: BytesIO) -> (int, int):
     # width=1280
     # height=720
 
-    width_line, height_line = output.split('\n')[:2]
+    # width_line, height_line = output.split('\n')[:2]
 
-    _, width = width_line.split('=')
-    _, height = height_line.split('=')
+    # _, width = width_line.split('=')
+    # _, height = height_line.split('=')
+
+    width, height = output.split('x')
 
     return int(width), int(height)
 
@@ -99,7 +100,7 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
         f.write(video.read())
         video.seek(0)
 
-    cmd = ("avconv -i {} -i {} -strict -2 -filter_complex \"overlay=0:0\" {}"
+    cmd = ("/usr/bin/avconv -i {} -i {} -strict -2 -filter_complex \"overlay=0:0\" {}"
            "".format(tmp_loc, overlay_loc, output_loc))
 
     output = getoutput(cmd)
