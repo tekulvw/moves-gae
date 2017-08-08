@@ -5,6 +5,8 @@ from typing import Union
 from flask import current_app
 from google.cloud import storage
 
+import uuid
+
 
 def _get_storage_client():
     return storage.Client(
@@ -24,6 +26,10 @@ def _get_image_prefix() -> str:
 
 def _get_video_prefix() -> str:
     return current_app.config['VIDEO_PREFIX']
+
+
+def _get_transcoding_prefix() -> str:
+    return current_app.config['TRANSCODING_PREFIX']
 
 
 def generate_image_path(output_name: str, ext: str) -> Path:
@@ -57,6 +63,15 @@ def generate_video_path(output_name: str, ext: str) -> Path:
     path = "{}/{}.{}".format(video_store, output_name, ext)
 
     return Path(path)
+
+
+def generate_transcoding_path() -> Path:
+    """
+    Generates a directory path that can be used for publishing transcode events.
+    :return:
+    """
+    prefix = _get_transcoding_prefix()
+    return Path(prefix, uuid.uuid4())
 
 
 def upload_data(data: BytesIO, content_type: str, full_path: Path) -> str:

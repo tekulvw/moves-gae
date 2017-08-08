@@ -1,4 +1,5 @@
 google-cloud-pubsub
 google-cloud-storage
 Flask
+pillow
 honcho
