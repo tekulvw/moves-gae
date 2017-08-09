@@ -138,6 +138,16 @@ def _upload_final(video: BytesIO, file_name, proj, bucket, content_type):
     blob.make_public()
 
 
+def _delete_transcoding_files(*locs):
+    client = storage.Client(project=project_id)
+    bucket = client.bucket(bucket_name)
+
+    for loc in locs:
+        blob = bucket.blob(loc)
+        if blob.exists():
+            blob.delete()
+
+
 def process_message(msg, proj, bucket):
     data = json.loads(msg.data.decode('utf-8'))
 
@@ -151,6 +161,8 @@ def process_message(msg, proj, bucket):
     output = _render_overlay(video, overlay)
 
     _upload_final(output, Path(video_loc).name, proj, bucket, content_type)
+
+    _delete_transcoding_files(video_loc, overlay_loc)
 
 
 if __name__ == '__main__':
