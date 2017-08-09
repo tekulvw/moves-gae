@@ -1,3 +1,14 @@
+"""
+List of Endpoints
+=================
+
+    - :code:`/video_upload`: Handled by :py:func:`video_upload`.
+    - :code:`/video_upload_with_overlay`: Handled by :py:func:`video_upload_with_overlay`.
+
+API Reference
+=============
+"""
+
 import json
 import logging
 from flask import Flask, request, abort, current_app
@@ -17,7 +28,11 @@ def video_upload():
     """
     This requires "post_id", "ext" and "content-type" as form data keys along with
     "video" file key (also form data technically).
+
     :return:
+        - 204 - No content.
+        - 400 - Missing data field.
+        - 5XX - Request too large.
     """
     video, file_name, ext, content_type = _extract_data_video_upload()
 
@@ -30,6 +45,7 @@ def video_upload():
 def _extract_data_video_upload():
     """
     Extracts required data from form data for video uploading.
+
     :return:
     """
     video = request.files.get('video')
@@ -44,6 +60,17 @@ def _extract_data_video_upload():
 
 
 def video_upload_with_overlay():
+    """
+    Video upload with an overlay image. This endpoint will schedule transcoding
+    of the video (e.g. it won't happen in this request call).
+
+    Requires an extra "overlay" form data field that must be a PNG.
+
+    :return:
+        - 204 - No content.
+        - 400 - Missing data field.
+        - 5XX - Request too large.
+    """
     overlay, (video, file_name, ext, content_type) = _extract_overlay_data()
 
     _publish_video_overlay_upload(overlay, video, file_name, ext, content_type)
@@ -90,6 +117,11 @@ def _extract_overlay_data():
 
 
 def setup_routing(app: Flask):
+    """
+    Basic routing function for flask.
+
+    :param flask.Flask app: Your flask application object.
+    """
     app.add_url_rule('/video_upload', endpoint='video',
                      view_func=video_upload,
                      methods=["POST"])

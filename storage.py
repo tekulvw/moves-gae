@@ -1,3 +1,10 @@
+"""
+Utilities for interacting with Google Cloud Storage.
+
+API Reference
+=============
+"""
+
 from io import BytesIO
 from pathlib import Path
 from typing import Union
@@ -34,13 +41,14 @@ def _get_transcoding_prefix() -> str:
 
 def generate_image_path(output_name: str, ext: str) -> Path:
     """
-    Generates the full path to be passed to :py:function:`upload_file`.
+    Generates the full path to be passed to :py:func:`.upload_data`.
+
     :param output_name:
         Output filename, usually gathered from an upload request.
     :param ext:
         Output extension, usually gathered from an upload request.
     :return:
-        Full path to be passed to :py:function:`upload_file`.
+        Full path to be passed to :py:func:`.upload_data`.
     """
     image_store = _get_image_prefix()
 
@@ -51,13 +59,14 @@ def generate_image_path(output_name: str, ext: str) -> Path:
 
 def generate_video_path(output_name: str, ext: str) -> Path:
     """
-    Generates the full path to be passed to :py:function:`upload_file`.
+    Generates the full path to be passed to :py:func:`upload_data`.
+
     :param output_name:
         Output filename, usually gathered from an upload request.
     :param ext:
         Output extension, usually gathered from an upload request.
     :return:
-        Full path to be passed to :py:function:`storage.upload_file`.
+        Full path to be passed to :py:func:`.upload_data`.
     """
     video_store = _get_video_prefix()
     path = "{}/{}.{}".format(video_store, output_name, ext)
@@ -68,6 +77,7 @@ def generate_video_path(output_name: str, ext: str) -> Path:
 def generate_transcoding_path() -> Path:
     """
     Generates a directory path that can be used for publishing transcode events.
+
     :return:
     """
     prefix = _get_transcoding_prefix()
@@ -77,6 +87,7 @@ def generate_transcoding_path() -> Path:
 def upload_data(data: BytesIO, content_type: str, full_path: Path) -> str:
     """
     Uploads binary data to the given path on Google Cloud Storage.
+
     :param data:
         Binary data (for now just photos/videos).
     :param content_type:
@@ -103,8 +114,10 @@ def upload_data(data: BytesIO, content_type: str, full_path: Path) -> str:
 def get_public_url(filename: str) -> Union[str, None]:
     """
     Get's a files public url based on the filename. Could be a video or image.
+
     :param filename:
-    :return: Public URL
+    :return:
+        Public URL
     """
     url = get_image_url(filename)
     if url is None:
@@ -116,8 +129,10 @@ def get_public_url(filename: str) -> Union[str, None]:
 def get_image_url(filename: str) -> Union[str, None]:
     """
     Gets an image's public url based on the filename without extension.
+
     :param filename:
     :return:
+        Image's public URL.
     """
     bucket = _get_bucket()
     img_prefix = _get_image_prefix()
@@ -131,8 +146,10 @@ def get_image_url(filename: str) -> Union[str, None]:
 def get_video_url(filename: str) -> Union[str, None]:
     """
     Gets a video's public url based on the filename without extension.
+
     :param filename:
     :return:
+        Video's public URL
     """
     bucket = _get_bucket()
     vid_prefix = _get_video_prefix()

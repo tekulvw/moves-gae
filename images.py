@@ -1,3 +1,14 @@
+"""
+List of Endpoints
+=================
+
+    - :code:`/image_upload`: Handled by :py:func:`image_upload`.
+    - :code:`/image_upload_with_overlay`: Handled by :py:func:`image_upload_with_overlay`.
+
+API Reference
+=============
+"""
+
 from io import BytesIO
 
 import flask
@@ -15,7 +26,11 @@ def image_upload():
     Expects form data fields "output", "ext" and "content-type" which are used
     to save the output name. Expects image to be uploaded as multipart/file-upload
     and accessible under the name "image".
+
     :return:
+        - 204 - No content.
+        - 400 - Missing data field.
+        - 5XX - Request too large.
     """
     image, output, ext, content_type = _extract_base_image_form_data()
     _handle_image_uploading(image.read(), output, ext, content_type)
@@ -62,8 +77,13 @@ def _handle_image_uploading(image: BytesIO, output: str, ext: str, content_type:
 
 def image_upload_with_overlay():
     """
-    Endpoint for image + overlay upload.
+    Endpoint for image + overlay upload. Has an additional form data field "overlay"
+    that is required.
+
     :return:
+        - 204 - No content.
+        - 400 - Missing data field.
+        - 5XX - Request too large.
     """
     overlay, (image, output, ext, content_type) = _extract_overlay_form_data()
 
@@ -153,6 +173,11 @@ def _extract_overlay_form_data():
 
 
 def setup_routing(app: flask.Flask):
+    """
+    Basic routing function for flask.
+
+    :param flask.Flask app: Your flask application object.
+    """
     app.add_url_rule('/image_upload', endpoint='image',
                      view_func=image_upload,
                      methods=["POST"])
