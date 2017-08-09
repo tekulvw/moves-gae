@@ -20,8 +20,8 @@ import storage
 log = logging.getLogger(__name__)
 
 
-# I thoroughly dislike doing this, here's the alternative:
-# https://github.com/waprin/appengine-transcoder
+# Now based on:
+#  https://github.com/waprin/appengine-transcoder
 
 
 def video_upload():
@@ -80,6 +80,16 @@ def video_upload_with_overlay():
 
 def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
                                   file_name: str, ext: str, content_type: str):
+    """
+    Uploads overlay and video to Cloud storage for later transcoding and publishes
+    to Cloud PubSub.
+    :param overlay:
+    :param video:
+    :param str file_name:
+    :param str ext:
+    :param str content_type:
+    :return:
+    """
     path = storage.generate_transcoding_path()
 
     overlay_path = path / 'overlay.png'
@@ -108,6 +118,10 @@ def _get_transcode_topic():
 
 
 def _extract_overlay_data():
+    """
+    Extracts overlay data from form data.
+    :return:
+    """
     normal_data = _extract_data_video_upload()
     overlay = request.files.get('overlay')
     if overlay is None:

@@ -23,7 +23,7 @@ def image_upload():
     """
     Endpoint for just image upload.
 
-    Expects form data fields "output", "ext" and "content-type" which are used
+    Expects form data fields "post_id", "ext" and "content-type" which are used
     to save the output name. Expects image to be uploaded as multipart/file-upload
     and accessible under the name "image".
 
@@ -45,18 +45,18 @@ def _extract_base_image_form_data():
     :rtype:tuple
     """
     form = request.form
-    output = form.get('output')
+    post_id = form.get('post_id')
     ext = form.get('ext')
     content_type = form.get('content-type')
     image = request.files.get('image')
 
-    if None in (output, ext, image, content_type):
+    if None in (post_id, ext, image, content_type):
         abort(400, 'Missing required data field. See documentation for more details')
 
-    return image, output, ext, content_type
+    return image, post_id, ext, content_type
 
 
-def _handle_image_uploading(image: BytesIO, output: str, ext: str, content_type: str) -> str:
+def _handle_image_uploading(image: BytesIO, post_id: str, ext: str, content_type: str) -> str:
     """
     Uploads the given image to Cloud Storage at the location specified by environment
     variable "IMAGE_STORE".
@@ -70,7 +70,7 @@ def _handle_image_uploading(image: BytesIO, output: str, ext: str, content_type:
         Full path location in Cloud Storage
     """
 
-    full_path = generate_image_path(output, ext)
+    full_path = generate_image_path(post_id, ext)
 
     return upload_data(image, content_type, full_path)
 
@@ -85,11 +85,11 @@ def image_upload_with_overlay():
         - 400 - Missing data field.
         - 5XX - Request too large.
     """
-    overlay, (image, output, ext, content_type) = _extract_overlay_form_data()
+    overlay, (image, post_id, ext, content_type) = _extract_overlay_form_data()
 
     combined_image = _combine_images(image, overlay, ext)
 
-    _handle_image_uploading(combined_image, output, ext, content_type)
+    _handle_image_uploading(combined_image, post_id, ext, content_type)
     return '', 204
 
 

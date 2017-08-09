@@ -39,11 +39,11 @@ def _get_transcoding_prefix() -> str:
     return current_app.config['TRANSCODING_PREFIX']
 
 
-def generate_image_path(output_name: str, ext: str) -> Path:
+def generate_image_path(post_id: str, ext: str) -> Path:
     """
     Generates the full path to be passed to :py:func:`.upload_data`.
 
-    :param output_name:
+    :param post_id:
         Output filename, usually gathered from an upload request.
     :param ext:
         Output extension, usually gathered from an upload request.
@@ -52,7 +52,7 @@ def generate_image_path(output_name: str, ext: str) -> Path:
     """
     image_store = _get_image_prefix()
 
-    path = "{}/{}.{}".format(image_store, output_name, ext)
+    path = "{}/{}.{}".format(image_store, post_id, ext)
 
     return Path(path)
 
