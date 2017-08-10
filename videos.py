@@ -2,8 +2,8 @@
 List of Endpoints
 =================
 
-    - :code:`/video_upload`: Handled by :py:func:`video_upload`.
-    - :code:`/video_upload_with_overlay`: Handled by :py:func:`video_upload_with_overlay`.
+    - :code:`/upload/video`: Handled by :py:func:`video_upload`.
+    - :code:`/upload/video/overlay`: Handled by :py:func:`video_upload_with_overlay`.
 
 API Reference
 =============
@@ -136,9 +136,9 @@ def setup_routing(app: Flask):
 
     :param flask.Flask app: Your flask application object.
     """
-    app.add_url_rule('/video_upload', endpoint='video',
+    app.add_url_rule('/upload/video', endpoint='video',
                      view_func=video_upload,
                      methods=["POST"])
-    app.add_url_rule('/video_upload_with_overlay', endpoint='video.overlay',
+    app.add_url_rule('/upload/video/overlay', endpoint='video.overlay',
                      view_func=video_upload_with_overlay,
                      methods=["POST"])
