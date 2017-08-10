@@ -1,4 +1,5 @@
 import json
+import uuid
 from io import BytesIO
 from pathlib import Path
 from subprocess import getoutput, run, PIPE
@@ -56,8 +57,6 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
     overlay = _check_rotation_exif(overlay)
     overlay = overlay.resize(size)
 
-    import uuid
-
     tmp_loc = "/tmp/{}.mp4".format(uuid.uuid4())
     overlay_loc = "/tmp/{}.png".format(uuid.uuid4())
     output_loc = "/tmp/{}.mp4".format(uuid.uuid4())
@@ -82,6 +81,31 @@ def _render_overlay(video: BytesIO, overlay: Image) -> BytesIO:
 
     os.remove(tmp_loc)
     os.remove(overlay_loc)
+    os.remove(output_loc)
+
+    return output
+
+
+def _reencode_video(video: BytesIO) -> BytesIO:
+    tmp_loc = "/tmp/{}.mp4".format(uuid.uuid4())
+    output_loc = "/tmp/{}.mp4".format(uuid.uuid4())
+
+    with open(tmp_loc, 'wb') as f:
+        f.write(video.read())
+        video.seek(0)
+
+    cmd = ["/usr/bin/avconv", "-i", tmp_loc, "-codec:v", "libx264",
+           "-b:v", "2048k", "-bufsize", "500k", output_loc]
+
+    output = run(cmd, stdout=PIPE, stderr=PIPE)
+    if output.returncode != 0:
+        raise RuntimeError("Avconv process did not return successfully. LOG:\n"
+                           "{}\n\n{}".format(output.stdout, output.stderr))
+
+    with open(output_loc, 'rb') as f:
+        output = BytesIO(f.read())
+
+    os.remove(tmp_loc)
     os.remove(output_loc)
 
     return output
@@ -152,17 +176,22 @@ def process_message(msg, proj, bucket):
     data = json.loads(msg.data.decode('utf-8'))
 
     video_loc = data['video']
-    overlay_loc = data['overlay']
     content_type = data['content_type']
 
     video = get_from_storage(video_loc, proj, bucket)
-    overlay = Image.open(get_from_storage(overlay_loc, proj, bucket))
 
-    output = _render_overlay(video, overlay)
+    transcoding_files = [video_loc]
+
+    if 'overlay' in data:
+        overlay_loc = data['overlay']
+        transcoding_files.append(overlay_loc)
+        overlay = Image.open(get_from_storage(overlay_loc, proj, bucket))
+        output = _render_overlay(video, overlay)
+    else:
+        output = _reencode_video(video)
 
     _upload_final(output, Path(video_loc).name, proj, bucket, content_type)
-
-    _delete_transcoding_files(video_loc, overlay_loc)
+    _delete_transcoding_files(*transcoding_files)
 
 
 if __name__ == '__main__':
