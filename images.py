@@ -33,7 +33,7 @@ def image_upload():
         - 5XX - Request too large.
     """
     image, output, ext, content_type = _extract_base_image_form_data()
-    _handle_image_uploading(image.read(), output, ext, content_type)
+    _handle_image_uploading(image, output, ext, content_type)
     return '', 204
 
 
