@@ -2,8 +2,8 @@
 List of Endpoints
 =================
 
-    - :code:`/image_upload`: Handled by :py:func:`image_upload`.
-    - :code:`/image_upload_with_overlay`: Handled by :py:func:`image_upload_with_overlay`.
+    - :code:`/upload/image`: Handled by :py:func:`image_upload`.
+    - :code:`/upload/image/overlay`: Handled by :py:func:`image_upload_with_overlay`.
 
 API Reference
 =============
@@ -178,9 +178,9 @@ def setup_routing(app: flask.Flask):
 
     :param flask.Flask app: Your flask application object.
     """
-    app.add_url_rule('/image_upload', endpoint='image',
+    app.add_url_rule('/upload/image', endpoint='image',
                      view_func=image_upload,
                      methods=["POST"])
-    app.add_url_rule('/image_upload_with_overlay', endpoint='image.overlay',
+    app.add_url_rule('/upload/image/overlay', endpoint='image.overlay',
                      view_func=image_upload_with_overlay,
                      methods=["POST"])
