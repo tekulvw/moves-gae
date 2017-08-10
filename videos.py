@@ -11,6 +11,8 @@ API Reference
 
 import json
 import logging
+from typing import Union
+
 from flask import Flask, request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from google.cloud import pubsub
@@ -36,9 +38,7 @@ def video_upload():
     """
     video, file_name, ext, content_type = _extract_data_video_upload()
 
-    full_path = storage.generate_video_path(file_name, ext)
-
-    storage.upload_data(video, content_type, full_path)
+    _publish_video_overlay_upload(None, video, file_name, ext, content_type)
     return '', 204
 
 
@@ -78,12 +78,16 @@ def video_upload_with_overlay():
     return '', 204
 
 
-def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
-                                  file_name: str, ext: str, content_type: str):
+def _publish_video_overlay_upload(overlay: Union[FileStorage, None],
+                                  video: FileStorage, file_name: str,
+                                  ext: str, content_type: str):
     """
     Uploads overlay and video to Cloud storage for later transcoding and publishes
     to Cloud PubSub.
+
     :param overlay:
+        If overlay is :code:`None` the video will simply be re-encoded at a lower
+        bitrate.
     :param video:
     :param str file_name:
     :param str ext:
@@ -92,17 +96,18 @@ def _publish_video_overlay_upload(overlay: FileStorage, video: FileStorage,
     """
     path = storage.generate_transcoding_path()
 
-    overlay_path = path / 'overlay.png'
     video_path = path / (file_name + '.' + ext)
-
-    storage.upload_data(overlay, 'image/png', overlay_path)
     storage.upload_data(video, content_type, video_path)
 
     pubsub_payload = dict(
         video=str(video_path),
-        overlay=str(overlay_path),
         content_type=content_type
     )
+
+    if overlay:
+        overlay_path = path / 'overlay.png'
+        storage.upload_data(overlay, 'image/png', overlay_path)
+        pubsub_payload['overlay'] = str(overlay_path)
 
     topic = _get_transcode_topic()
     topic.publish(json.dumps(pubsub_payload).encode('utf-8'))
