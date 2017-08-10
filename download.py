@@ -16,17 +16,17 @@ import storage
 
 def download_image():
     """
-    This function expects a :code:`key` URL parameter. Key is the post's ID and corresponds to the
+    This function expects a :code:`post_id` URL parameter. Post ID corresponds to the
     filename w/o extension in Storage. This endpoint should redirect to the file's location in Storage.
 
     :return:
         Redirects to the file's location in Storage.
     """
-    key = request.args.get('key')
-    if key is None:
-        abort(400, 'Missing "key" URL parameter.')
+    post_id = request.args.get('post_id')
+    if post_id is None:
+        abort(400, 'Missing "post_id" URL parameter.')
 
-    file_url = storage.get_image_url(key)
+    file_url = storage.get_image_url(post_id)
     if file_url is None:
         abort(400, 'No matching file found.')
 
@@ -35,17 +35,17 @@ def download_image():
 
 def download_video():
     """
-    This function expects a :code:`key` URL parameter. Key is the post's ID and corresponds to the
+    This function expects a :code:`post_id` URL parameter. Post ID corresponds to the
     filename w/o extension in Storage. This endpoint should redirect to the file's location in Storage.
 
     :return:
         Redirects to the file's location in Storage.
     """
-    key = request.args.get('key')
-    if key is None:
-        abort(400, 'Missing "key" URL parameter.')
+    post_id = request.args.get('post_id')
+    if post_id is None:
+        abort(400, 'Missing "post_id" URL parameter.')
 
-    file_url = storage.get_video_url(key)
+    file_url = storage.get_video_url(post_id)
     if file_url is None:
         abort(400, 'No matching file found.')
 
