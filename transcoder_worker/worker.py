@@ -125,17 +125,18 @@ def _check_rotation_exif(image: Image) -> Image:
         if ExifTags.TAGS[orientation] == 'Orientation':
             try:
                 exif = dict(image._getexif().items())
-            except AttributeError:
+                val = exif[orientation]
+            except (AttributeError, KeyError):
                 return image
 
-            if exif[orientation] == 3:
+            if val == 3:
                 image = image.rotate(180, expand=True)
-            elif exif[orientation] == 6:
+            elif val == 6:
                 image = image.rotate(270, expand=True)
-            elif exif[orientation] == 8:
+            elif val == 8:
                 image = image.rotate(90, expand=True)
             return image
-    return image
+        return image
 
 
 def get_from_storage(path, proj, buckname) -> BytesIO:
@@ -199,7 +200,7 @@ if __name__ == '__main__':
     transcode_topic_name = os.environ.get('TRANSCODE_TOPIC')
     bucket_name = os.environ.get('STORAGE_BUCKET')
 
-    pubsub_client = pubsub.Client(project=project_id)
+    pubsub_client = pubsub.Client(project=project_id, _use_grpc=False)
     topic = pubsub_client.topic(transcode_topic_name)
     if not topic.exists():
         topic.create()
@@ -210,10 +211,21 @@ if __name__ == '__main__':
 
     print("Polling pubsub.")
 
+    failed = {}
+
     while True:
         messages = sub.pull(
             return_immediately=False, max_messages=1
         )
         for ack_id, message in messages:
-            process_message(message, project_id, bucket_name)
+            try:
+                process_message(message, project_id, bucket_name)
+            except:
+                print('failed to process msg: {}'.format(message))
+                if message.message_id not in failed:
+                    failed[message.message_id] = 0
+                failed[message.message.message_id] += 1
+
+                if failed[message.message_id] != 3:
+                    raise
             sub.acknowledge([ack_id])
