@@ -146,14 +146,15 @@ def _check_rotation_exif(image: Image) -> Image:
         if ExifTags.TAGS[orientation] == 'Orientation':
             try:
                 exif = dict(image._getexif().items())
-            except AttributeError:
+                val = exif[orientation]
+            except (AttributeError, KeyError):
                 return image
 
-            if exif[orientation] == 3:
+            if val == 3:
                 image = image.rotate(180, expand=True)
-            elif exif[orientation] == 6:
+            elif val == 6:
                 image = image.rotate(270, expand=True)
-            elif exif[orientation] == 8:
+            elif val == 8:
                 image = image.rotate(90, expand=True)
             return image
     return image
