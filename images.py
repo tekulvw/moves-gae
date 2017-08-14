@@ -2,8 +2,8 @@
 List of Endpoints
 =================
 
-    - :code:`/image_upload`: Handled by :py:func:`image_upload`.
-    - :code:`/image_upload_with_overlay`: Handled by :py:func:`image_upload_with_overlay`.
+    - :code:`/upload/image`: Handled by :py:func:`image_upload`.
+    - :code:`/upload/image/overlay`: Handled by :py:func:`image_upload_with_overlay`.
 
 API Reference
 =============
@@ -146,14 +146,15 @@ def _check_rotation_exif(image: Image) -> Image:
         if ExifTags.TAGS[orientation] == 'Orientation':
             try:
                 exif = dict(image._getexif().items())
-            except AttributeError:
+                val = exif[orientation]
+            except (AttributeError, KeyError):
                 return image
 
-            if exif[orientation] == 3:
+            if val == 3:
                 image = image.rotate(180, expand=True)
-            elif exif[orientation] == 6:
+            elif val == 6:
                 image = image.rotate(270, expand=True)
-            elif exif[orientation] == 8:
+            elif val == 8:
                 image = image.rotate(90, expand=True)
             return image
     return image
@@ -178,9 +179,9 @@ def setup_routing(app: flask.Flask):
 
     :param flask.Flask app: Your flask application object.
     """
-    app.add_url_rule('/image_upload', endpoint='image',
+    app.add_url_rule('/upload/image', endpoint='image',
                      view_func=image_upload,
                      methods=["POST"])
-    app.add_url_rule('/image_upload_with_overlay', endpoint='image.overlay',
+    app.add_url_rule('/upload/image/overlay', endpoint='image.overlay',
                      view_func=image_upload_with_overlay,
                      methods=["POST"])
