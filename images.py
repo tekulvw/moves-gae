@@ -16,6 +16,7 @@ from PIL import Image, ExifTags
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 
+import storage
 from storage import upload_data, generate_image_path
 
 
@@ -173,6 +174,26 @@ def _extract_overlay_form_data():
     return overlay, _extract_base_image_form_data()
 
 
+def delete_image():
+    """
+    Deletes an image from Cloud Storage. Requires "post_id" url parameter.
+
+    :return:
+        - 204 - Image successfully deleted.
+        - 400 - Missing post_id url parameter or no such image found.
+    """
+    post_id = request.args.get('post_id')
+    if post_id is None:
+        abort(400, 'Missing "post_id" URL parameter.')
+
+    ret = storage.delete_image(post_id)
+
+    if ret:
+        return '', 204
+    else:
+        abort(400, 'No such image found.')
+
+
 def setup_routing(app: flask.Flask):
     """
     Basic routing function for flask.
@@ -185,3 +206,6 @@ def setup_routing(app: flask.Flask):
     app.add_url_rule('/upload/image/overlay', endpoint='image.overlay',
                      view_func=image_upload_with_overlay,
                      methods=["POST"])
+    app.add_url_rule('/delete/image', endpoint='image.delete',
+                     view_func=delete_image,
+                     methods=["DELETE"])

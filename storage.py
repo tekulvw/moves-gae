@@ -159,3 +159,38 @@ def get_video_url(filename: str) -> Union[str, None]:
         if path.stem == filename:
             return blob.public_url
 
+
+def delete_image(filename: str) -> bool:
+    """
+    Deletes an image with the given filename (without extension).
+
+    :param filename:
+    :return: :code:`True` if deleted, ``False`` if not found.
+    """
+    bucket = _get_bucket()
+    img_prefix = _get_image_prefix()
+
+    for blob in bucket.list_blobs(prefix=img_prefix):
+        path = Path(blob.name)
+        if path.stem == filename:
+            blob.delete()
+            return True
+    return False
+
+
+def delete_video(filename: str) -> bool:
+    """
+    Deletes a video with the given filename (without extension).
+
+    :param filename:
+    :return: :code:`True` if deleted, ``False`` if not found.
+    """
+    bucket = _get_bucket()
+    vid_prefix = _get_video_prefix()
+
+    for blob in bucket.list_blobs(prefix=vid_prefix):
+        path = Path(blob.name)
+        if path.stem == filename:
+            blob.delete()
+            return True
+    return False

@@ -135,6 +135,26 @@ def _extract_overlay_data():
     return overlay, normal_data
 
 
+def delete_video():
+    """
+    Deletes a video from Cloud Storage. Requires "post_id" url parameter.
+
+    :return:
+        - 204 - Video successfully deleted.
+        - 400 - Missing post_id url parameter or no such image found.
+    """
+    post_id = request.args.get('post_id')
+    if post_id is None:
+        abort(400, 'Missing "post_id" URL parameter.')
+
+    ret = storage.delete_video(post_id)
+
+    if ret:
+        return '', 204
+    else:
+        abort(400, 'No such video found.')
+
+
 def setup_routing(app: Flask):
     """
     Basic routing function for flask.
@@ -147,3 +167,6 @@ def setup_routing(app: Flask):
     app.add_url_rule('/upload/video/overlay', endpoint='video.overlay',
                      view_func=video_upload_with_overlay,
                      methods=["POST"])
+    app.add_url_rule('/delete/video', endpoint='video.delete',
+                     view_func=delete_video,
+                     methods=["DELETE"])
