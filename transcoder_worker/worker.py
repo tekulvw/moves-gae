@@ -145,6 +145,11 @@ def get_from_storage(path, proj, buckname) -> BytesIO:
 
     blob = bucket.get_blob(path)
 
+    if blob is None:
+        raise RuntimeError("Blob at '{}' has been deleted.".format(
+            path
+        ))
+
     return BytesIO(blob.download_as_string())
 
 
@@ -220,12 +225,6 @@ if __name__ == '__main__':
         for ack_id, message in messages:
             try:
                 process_message(message, project_id, bucket_name)
-            except:
-                print('failed to process msg: {}'.format(message))
-                if message.message_id not in failed:
-                    failed[message.message_id] = 0
-                failed[message.message.message_id] += 1
-
-                if failed[message.message_id] != 3:
-                    raise
+            except RuntimeError as e:
+                print(e)
             sub.acknowledge([ack_id])
