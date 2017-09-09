@@ -23,10 +23,3 @@ deploy:
   project: moves-gae
   config: transcoder_worker/worker.yaml
   on: master
-- provider: gae
-  keyfile: travis-client-secret.json
-  project: moves-gae
-  version: develop
-  on: develop
-  no_promote: true
-  no_stop_previous_version: true
