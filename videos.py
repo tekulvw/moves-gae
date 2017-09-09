@@ -4,7 +4,7 @@ List of Endpoints
 
     - :code:`/upload/video`: Handled by :py:func:`video_upload`.
     - :code:`/upload/video/overlay`: Handled by :py:func:`video_upload_with_overlay`.
-	- :code:`/upload/video/direct`: Handled by :py:func:`video_upload_direct`.
+    - :code:`/upload/video/direct`: Handled by :py:func:`video_upload_direct`.
 
 API Reference
 =============
@@ -77,8 +77,9 @@ def video_upload_with_overlay():
     _publish_video_overlay_upload(overlay, video, file_name, ext, content_type)
 
     return '', 204
-	
-	def video_upload_direct():
+
+
+def video_upload_direct():
     """
     Video upload with no processing or transcoding, just straight dump into storage.
 
@@ -88,34 +89,32 @@ def video_upload_with_overlay():
         - 5XX - Request too large.
     """
 
-	video, output, ext, content_type = _extract_base_image_form_data()
-    _publish_video_overlay_upload(overlay, video, file_name, ext, content_type)
+    video, post_id, ext, content_type = _extract_base_video_form_data()
 
-
-    video_path = storage.generate_video_path(output,ext)
+    video_path = storage.generate_video_path(post_id, ext)
     storage.upload_data(video, content_type, video_path)
-	
+
     return '', 204
 
+
 def _extract_base_video_form_data():
-	"""
-	Extracts form data for :py:function:`image_upload`.
-	:return:
-		Necessary form elements
-	:rtype:tuple
-	"""
-	form = request.form
-	post_id = form.get('post_id')
-	ext = form.get('ext')
-	content_type = form.get('content-type')
-	video = request.files.get('video')
+    """
+    Extracts form data for :py:function:`image_upload`.
+    :return:
+        Necessary form elements
+    :rtype:tuple
+    """
+    form = request.form
+    post_id = form.get('post_id')
+    ext = form.get('ext')
+    content_type = form.get('content-type')
+    video = request.files.get('video')
 
-	if None in (post_id, ext, video, content_type):
-		abort(400, 'Missing required data field. See documentation for more details')
+    if None in (post_id, ext, video, content_type):
+        abort(400, 'Missing required data field. See documentation for more details')
 
-	return video, post_id, ext, content_type
+    return video, post_id, ext, content_type
 
-	
 
 def _publish_video_overlay_upload(overlay: Union[FileStorage, None],
                                   video: FileStorage, file_name: str,
